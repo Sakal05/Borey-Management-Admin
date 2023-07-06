@@ -286,7 +286,7 @@ const LoginPage = () => {
 
               <Typography variant='body2' sx={{ marginTop: 4 }}>
                 New on our platform?
-                <Link passHref href='/pages/c/register'>
+                <Link passHref href='/pages/a/register'>
                   <LinkStyled> Create an account</LinkStyled>
                 </Link>
               </Typography>
