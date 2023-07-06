@@ -40,9 +40,7 @@ export const SettingsProvider = ({ children }) => {
   useEffect(async () => {
     const token = localStorage.getItem('atoken')
     setToken(token)
-    if (token === null) {
-      router.push('/pages/a/login')
-    }
+    
   }, [])
  
   const [settings, setSettings] = useState({ ...initialSettings })
