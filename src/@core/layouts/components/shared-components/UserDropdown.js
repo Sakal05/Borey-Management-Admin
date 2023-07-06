@@ -41,7 +41,7 @@ const UserDropdown = () => {
   // ** States
   const [anchorEl, setAnchorEl] = useState(null)
   const [currentUser, setCurrentUser] = useState({
-    company_name: '',
+    username: '',
     role_id: ''
   })
  
@@ -56,13 +56,13 @@ const UserDropdown = () => {
           const res = await axios({
             method: 'GET',
             // baseURL: API_URL,
-            url: 'http://127.0.0.1:8000/api/company/loggedcompany',
+            url: 'http://127.0.0.1:8000/api/admin/loggedadmin',
             headers: {
               Authorization: `Bearer ${token}`
             }
           })
           console.log(res)
-          setCurrentUser(res.data.company)
+          setCurrentUser(res.data.admin)
         } catch (err) {
           console.log(err)
         }
@@ -93,7 +93,7 @@ const UserDropdown = () => {
       await axios({
         method: 'POST',
         // baseURL: API_URL,
-        url: 'http://localhost:8000/api/logout',
+        url: 'http://localhost:8000/api/admin/logout',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -104,7 +104,7 @@ const UserDropdown = () => {
 
       console.log('Log out successfully')
       clearAuthToken()
-      router.push('/pages/u/login')
+      router.push('/pages/a/login')
     } catch (err) {
       console.log(err)
     }
@@ -162,9 +162,9 @@ const UserDropdown = () => {
               <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
             </Badge>
             <Box sx={{ display: 'flex', marginLeft: 3, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>{currentUser.company_name}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>{currentUser.username}</Typography>
               <Typography variant='body2' sx={{ fontSize: '0.8rem', color: 'text.disabled' }}>
-                {currentUser.role_id === 2 ? 'ADMIN' : "UNKNOWN"}
+                {currentUser.role_id === 1 ? 'ADMIN' : "UNKNOWN"}
               </Typography>
             </Box>
           </Box>

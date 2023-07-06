@@ -38,6 +38,11 @@ const FormField = () => {
   const {
     contextTokenValue: { token }
   } = useContext(SettingsContext)
+  const [selectedCompany, setSelectedCompany] = useState('')
+
+  const handleCompanyFilterChange = event => {
+    setSelectedCompany(event.target.value)
+  }
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage)
@@ -53,7 +58,6 @@ const FormField = () => {
     setSelectedRow(row)
     // const { row } = props
     console.log(row.path)
- 
   }
 
   const fetchGeneralForm = async () => {
@@ -82,15 +86,18 @@ const FormField = () => {
     }
   }
 
-  const getImageItems = (row) => {
+  const getImageItems = row => {
     const imageItems = []
     console.log(row.path)
-    let images = row.path.split(','); // Display only 4 images initially
+    let images = row.path.split(',') // Display only 4 images initially
 
     images.map((item, index) => {
       imageItems.push(
         <Grid item xs={12} sm={12} md={12} key={index}>
-          <Box sx={{ height: '100%', width: '100%' }} onClick={() => handleViewImage(`https://gateway.ipfs.io/ipfs/${item}`)}>
+          <Box
+            sx={{ height: '100%', width: '100%' }}
+            onClick={() => handleViewImage(`https://gateway.ipfs.io/ipfs/${item}`)}
+          >
             <img
               src={`https://gateway.ipfs.io/ipfs/${item}`}
               loading='lazy'
@@ -108,7 +115,7 @@ const FormField = () => {
   const onUpdateStatus = async (e, info) => {
     const newStatus = e.target.value
     const form = new FormData()
-    console.log(info);
+    console.log(info)
     form.append('general_status', newStatus)
 
     try {
@@ -125,19 +132,18 @@ const FormField = () => {
       fetchGeneralForm()
     } catch (e) {
       console.log(e)
-      toast.error("Failed to Update")
+      toast.error('Failed to Update')
     }
-
   }
 
-  const handleViewImage = (url) => {
+  const handleViewImage = url => {
     // router.push(`https://gateway.ipfs.io/ipfs/${selectedRow.path}`)
-   
+
     window.open(url, '_blank')
   }
 
   useEffect(() => {
-    const t = localStorage.getItem('ctoken')
+    const t = localStorage.getItem('atoken')
     token = t
     console.log('token here inside curent page', token)
     if (!verifyLogin(t)) {
@@ -159,50 +165,65 @@ const FormField = () => {
                 <Table stickyHeader aria-label='sticky table' sx={{ margin: 5 }}>
                   <TableHead>
                     <TableRow>
+                      <TableCell sx={{ minWidth: 50, maxWidth: 200 }}>
+                        <FormControl fullWidth>
+                          <Select
+                            value={selectedCompany}
+                            onChange={handleCompanyFilterChange}
+                            displayEmpty
+                            inputProps={{ 'aria-label': 'Company' }}
+                          >
+                            <MenuItem value=''>All</MenuItem>
+                            {data &&
+                              data.length > 0 &&
+                              Array.from(new Set(data.map(info => info.user.companies.company_name))).map(company => (
+                                <MenuItem value={company} key={company}>
+                                  {company}
+                                </MenuItem>
+                              ))}
+                          </Select>
+                        </FormControl>
+                      </TableCell>
+
+                      <TableCell sx={{ minWidth: 80 }}>Company Name</TableCell>
                       <TableCell sx={{ minWidth: 80 }}>User Id</TableCell>
                       <TableCell sx={{ minWidth: 150 }}>FullName</TableCell>
                       <TableCell sx={{ minWidth: 100 }}>Category</TableCell>
                       <TableCell sx={{ minWidth: 50 }}>Problem</TableCell>
                       <TableCell sx={{ minWidth: 50 }}>Created at</TableCell>
-                      <TableCell sx={{ minWidth: 50 }}>Status</TableCell>
+                      <TableCell sx={{ minWidth: 50 }}>Status</TableCell>         
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {data && data.length > 0 && data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((info) => {
-                      console.log(info)
-                      return (
-                        <Fragment key={info.id}>
-                          <TableRow hover role='checkbox' tabIndex={-1} onClick={() => handleViewDetail(info)}>
-                            <TableCell align='left'>{info.user_id}</TableCell>
-                            <TableCell align='left'>{info.fullname}</TableCell>
-                            <TableCell align='left'>{info.category}</TableCell>
-                            <TableCell align='left'>
-                              <Button size='small' variant='outlined' sx={{ marginBottom: 7 }}>
-                                View Detail
-                              </Button>
-                            </TableCell>
-                            {/* <TableCell align='left'> {format(new Date(info.created_at), 'MMM dd, yyyy')}</TableCell> */}
-                            <TableCell align='left'> {moment(info.created_at).format('YYYY-MM-DD')}</TableCell>
+                    {data &&
+                      data.length > 0 &&
+                      data
+                        .filter(info => selectedCompany === '' || info.user.companies.company_name === selectedCompany)
 
-                            <TableCell align='left'>
-                              <FormControl sx={{ m: 1, minWidth: 120 }}>
-                                <Select
-                                  name='status'
-                                  value={info.general_status}
-                                  displayEmpty={true}
-                                  inputProps={{ 'aria-label': 'Without label' }}
-                                  onChange={e => onUpdateStatus(e, info)}
-                                >
-                                  <MenuItem value='pending'>Pending</MenuItem>
-                                  <MenuItem value='in_progress'>In Progress</MenuItem>
-                                  <MenuItem value='done'>Done</MenuItem>
-                                </Select>
-                              </FormControl>
-                            </TableCell>
-                          </TableRow>
-                        </Fragment>
-                      )
-                    })}
+                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        .map(info => {
+                          console.log(info)
+                          return (
+                            <Fragment key={info.id}>
+                              <TableRow hover role='checkbox' tabIndex={-1} onClick={() => handleViewDetail(info)}>
+                                <TableCell align='left'></TableCell>
+                                <TableCell align='left'>{info.user.companies.company_name}</TableCell>
+                                <TableCell align='left'>{info.user_id}</TableCell>
+                                <TableCell align='left'>{info.fullname}</TableCell>
+                                <TableCell align='left'>{info.category}</TableCell>
+                                <TableCell align='left'>
+                                  <Button size='small' variant='outlined' sx={{ marginBottom: 7 }}>
+                                    View Detail
+                                  </Button>
+                                </TableCell>
+                                {/* <TableCell align='left'> {format(new Date(info.created_at), 'MMM dd, yyyy')}</TableCell> */}
+                                <TableCell align='left'> {moment(info.created_at).format('YYYY-MM-DD')}</TableCell>
+
+                                <TableCell align='left'>{info.general_status}</TableCell>
+                              </TableRow>
+                            </Fragment>
+                          )
+                        })}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -235,7 +256,7 @@ const FormField = () => {
                           </Typography>
                         </TableCell>
                         <TableCell sx={{ maxWidth: 200 }}>
-                        <ImageList container>
+                          <ImageList container>
                             {/* {console.log(getImageItems().length)} */}
                             {getImageItems(selectedRow)}
                           </ImageList>

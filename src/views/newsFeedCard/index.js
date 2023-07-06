@@ -42,7 +42,7 @@ const NewsFeedCard = props => {
   const [comment, setComment] = useState('')
   const [likeClicked, setLikeClicked] = useState(false)
   const [cardHeight, setCardHeight] = useState('auto');
-  const token = localStorage.getItem('ctoken')
+  const token = localStorage.getItem('atoken')
   console.log('Each data for newsfeed card', cardData)
   const handleClick = () => {
     setCollapse(!collapse)
@@ -53,7 +53,7 @@ const NewsFeedCard = props => {
   }
 
   const handleDeletePost = async () => {
-    const token = localStorage.getItem('ctoken')
+    const token = localStorage.getItem('atoken')
     console.log('Id delete post: ', cardData.id)
     try {
       const res = await axios({

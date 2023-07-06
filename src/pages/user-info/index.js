@@ -41,9 +41,9 @@ const TableStickyHeader = () => {
     setPage(0)
   }
 
-  const fetchUserByCompany = async () => {
+  const fetchCompanies = async () => {
     console.log(token)
-    const url = 'http://127.0.0.1:8000/api/user_infos';
+    const url = 'http://127.0.0.1:8000/api/company/showCompanies';
     //`http://localhost:8000/api/user_infos`
     try {
       const res = await axios({
@@ -53,7 +53,7 @@ const TableStickyHeader = () => {
           Authorization: `Bearer ${token}`
         }
       })
-      console.log(res)
+      console.log('Companies', res)
       setData(res.data)
       setLoading(false)
     } catch (err) {
@@ -70,10 +70,10 @@ const TableStickyHeader = () => {
   }
 
   useEffect(() => {
-    const t = localStorage.getItem('ctoken')
+    const t = localStorage.getItem('atoken')
     token = t
     console.log('token here inside curent page', token)
-    fetchUserByCompany()
+    fetchCompanies()
     console.log(data)
     if (!verifyLogin(t)) {
       toast.error('Please Login')
@@ -94,10 +94,10 @@ const TableStickyHeader = () => {
             <Table stickyHeader aria-label='sticky table'>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ minWidth: 170 }}>User id</TableCell>
-                  <TableCell sx={{ minWidth: 170 }}>FullName</TableCell>
+                  <TableCell sx={{ minWidth: 170 }}>Company Id</TableCell>
+                  <TableCell sx={{ minWidth: 170 }}>Company Name</TableCell>
+                  <TableCell sx={{ minWidth: 170 }}>Username</TableCell>
                   <TableCell sx={{ minWidth: 170 }}>Email</TableCell>
-                  <TableCell sx={{ minWidth: 170 }}>Property Id</TableCell>
                   <TableCell sx={{ minWidth: 170 }}>Register at</TableCell>
                 </TableRow>
               </TableHead>
@@ -106,16 +106,16 @@ const TableStickyHeader = () => {
                   return (
                     <TableRow hover role='checkbox' tabIndex={-1} key={1}>
                       <TableCell key={info.id} align='left'>
-                        {info.user_id}
+                        {info.company_id}
                       </TableCell>
                       <TableCell key={info.id} align='left'>
-                        {info.user.fullname}
+                        {info.company_name}
                       </TableCell>
                       <TableCell key={info.id} align='left'>
-                        {info.user.email}
+                        {info.username}
                       </TableCell>
                       <TableCell key={info.id} align='left'>
-                        {info.house_type === '1' ? 'Teas cher' : info.house_type === '2' ? 'Teas Villa' : info.house_type === '3' ? 'Teas anh kom jes' : 'Teas ah na min dg'}
+                        {info.email}
                       </TableCell>
                       <TableCell key={info.id} align='left'>
                         {moment(info.created_at).format('YYYY-MM-DD')}

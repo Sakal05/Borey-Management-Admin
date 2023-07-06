@@ -11,8 +11,6 @@ import CardStatisticsVerticalComponent from 'src/@core/components/card-statistic
 
 // ** Styled Component Import
 import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
-import { useState, useEffect, useContext } from 'react'
-import { SettingsContext } from 'src/@core/context/settingsContext'
 
 // ** Demo Components Imports
 import Table from 'src/views/dashboard/Table'
@@ -22,78 +20,22 @@ import StatisticsCard from 'src/views/dashboard/StatisticsCard'
 import WeeklyOverview from 'src/views/dashboard/WeeklyOverview'
 import DepositWithdraw from 'src/views/dashboard/DepositWithdraw'
 import SalesByCountries from 'src/views/dashboard/SalesByCountries'
-import axios from 'axios'
-import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
 
 const Dashboard = () => {
-  const {
-    contextTokenValue: { token }
-  } = useContext(SettingsContext)
- const [currentUser, setCurrentUser] = useState(null)
- const [loadingData, setLoadingData] = useState(true)
-
- useEffect(() => {
-    const fetchUser = async () => {
-      if (token !== null) {
-        try {
-          const res = await axios({
-            method: 'GET',
-            // baseURL: API_URL,
-            url: 'http://127.0.0.1:8000/api/admin/loggedadmin',
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          })
-          console.log('Admin Info: ', res)
-          setCurrentUser(res.data.admin)
-          setLoadingData(false)
-        } catch (err) {
-          console.log(err)
-        }
-      }
-    }
-    if (token !== null) {
-      fetchUser();
-    }
-  }, [token])
     return (
       <ApexChartWrapper>
-        {loadingData && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            zIndex: 9999
-          }}
-        >
-          <CircularProgress />
-          <Typography variant='body1' style={{ marginLeft: '1rem' }}>
-            Please wait, uploading image...
-          </Typography>
-        </div>
-      )}
-      { currentUser !== null && (
-
         <Grid container spacing={6}>
           <Grid item xs={12} md={4}>
-            <Trophy info={currentUser} token={token}/>
+            <Trophy />
           </Grid>
           <Grid item xs={12} md={8}>
-            <StatisticsCard info={currentUser} token={token}/>
+            <StatisticsCard />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
-            <WeeklyOverview info={currentUser}  token={token}/>
+            <WeeklyOverview />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
-            <TotalEarning info={currentUser} token={token}/>
+            <TotalEarning />
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
             <Grid container spacing={6}>
@@ -151,7 +93,6 @@ const Dashboard = () => {
             <Table />
           </Grid>
         </Grid>
-      )}
       </ApexChartWrapper>
     )
   }

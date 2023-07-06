@@ -21,7 +21,10 @@ const TrophyImg = styled('img')({
   position: 'absolute'
 })
 
-const Trophy = () => {
+const Trophy = (props) => {
+  const {info} = props;
+
+  console.log(info)
   // ** Hook
   const theme = useTheme()
   const imageSrc = theme.palette.mode === 'light' ? 'triangle-light.png' : 'triangle-dark.png'
@@ -29,7 +32,7 @@ const Trophy = () => {
   return (
     <Card sx={{ position: 'relative' }}>
       <CardContent>
-        <Typography variant='h6'>Congratulations John! 🥳</Typography>
+        <Typography variant='h6'>{`Congratulations ${info.username} 🥳`}</Typography>
         <Typography variant='body2' sx={{ letterSpacing: '0.25px' }}>
           Best seller of the month
         </Typography>

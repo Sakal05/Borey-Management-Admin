@@ -1,6 +1,7 @@
 // ** React Imports
 import { createContext, useState, useEffect } from 'react'
 import { ToastContainer } from 'react-toastify'
+import { useRouter } from 'next/router'
 import 'react-toastify/dist/ReactToastify.css'
 // ** ThemeConfig Import
 import themeConfig from 'src/configs/themeConfig'
@@ -19,11 +20,11 @@ export const SettingsContext = createContext({
 
 export const SettingsProvider = ({ children }) => {
   const [token, setToken] = useState(null)
-
+  const router = useRouter()
   // Function to set the token
   const setAuthToken = newToken => {
     console.log('Token in context: ', newToken)
-    localStorage.setItem('ctoken', newToken)
+    localStorage.setItem('atoken', newToken)
     setToken(newToken)
   }
 
@@ -33,12 +34,15 @@ export const SettingsProvider = ({ children }) => {
   // Function to clear the token
   const clearAuthToken = () => {
     setToken(null)
-    localStorage.removeItem('ctoken')
+    localStorage.removeItem('atoken')
   }
 
   useEffect(async () => {
-    const token = localStorage.getItem('ctoken')
+    const token = localStorage.getItem('atoken')
     setToken(token)
+    if (token === null) {
+      router.push('/pages/a/login')
+    }
   }, [])
  
   const [settings, setSettings] = useState({ ...initialSettings })

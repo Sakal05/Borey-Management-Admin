@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 
 // ** Next Imports
 import Link from 'next/link'
@@ -21,6 +21,9 @@ import { styled, useTheme } from '@mui/material/styles'
 import MuiCard from '@mui/material/Card'
 import InputAdornment from '@mui/material/InputAdornment'
 import MuiFormControlLabel from '@mui/material/FormControlLabel'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 // ** Icons Imports
 import Google from 'mdi-material-ui/Google'
@@ -38,6 +41,9 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Demo Imports
 import FooterIllustrationsV1 from 'src/views/pages/auth/FooterIllustration'
+
+// context
+import { SettingsContext } from 'src/@core/context/settingsContext'
 
 // ** Styled Components
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -58,11 +64,21 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 }))
 
 const LoginPage = () => {
+  const {
+    contextTokenValue: { setAuthToken }
+  } = useContext(SettingsContext)
+
   // ** State
   const [values, setValues] = useState({
     password: '',
     showPassword: false
   })
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  const API_URL = 'http://localhost:8000/api/'
+
+  // const [token, setToken] = useState(null)
 
   // ** Hook
   const theme = useTheme()
@@ -72,12 +88,55 @@ const LoginPage = () => {
     setValues({ ...values, [prop]: event.target.value })
   }
 
+  const handleChangeEmail = e => {
+    setEmail(e.target.value)
+  }
+
+  const handleChangePassword = e => {
+    setPassword(e.target.value)
+  }
+
   const handleClickShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword })
   }
 
   const handleMouseDownPassword = event => {
     event.preventDefault()
+  }
+
+  const handleSubmit = async e => {
+    e.preventDefault()
+
+    let data = new FormData()
+    data.append('email', email)
+    data.append('password', password)
+    console.log('data: ', data)
+
+    
+    try {
+      const result = await axios({
+        method: 'POST',
+        baseURL: API_URL,
+        url: 'admin/login',
+        data: data,
+      });
+      const response = result.data
+      console.log(response)
+
+      if (response.message === 'Login Success') {
+        setAuthToken(response.token);
+        console.log('Login Successful');
+        router.push('/');
+      } else if (response.message === 'Wrong Email or Password') {
+        toast.error("Wrong Email or Password")
+        console.log("Incorrect password or email, please try again");
+        console.log('Failed to Login');
+      }
+    } catch (err) {
+      toast.error("Wrong Email or Password")
+    }
+  
+    
   }
 
   return (
@@ -154,24 +213,31 @@ const LoginPage = () => {
                 fontSize: '1.5rem !important'
               }}
             >
-              Borey management
+              Borey management Admin
             </Typography>
           </Box>
           <Box sx={{ mb: 6 }}>
             <Typography variant='h5' sx={{ fontWeight: 500, marginBottom: 1.5 }}>
-              Welcome to Admin Borey Management! 👋🏻
+              Welcome to Company Borey Management Admin! 👋🏻
             </Typography>
             <Typography variant='body2'>Please sign-in to your admin account and start the using the tool</Typography>
           </Box>
-          <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-            <TextField autoFocus fullWidth id='email' label='Email' sx={{ marginBottom: 4 }} />
+          <form noValidate autoComplete='off' onSubmit={handleSubmit}>
+            <TextField
+              autoFocus
+              fullWidth
+              id='email'
+              label='Email'
+              sx={{ marginBottom: 4 }}
+              onChange={handleChangeEmail}
+            />
             <FormControl fullWidth>
               <InputLabel htmlFor='auth-login-password'>Password</InputLabel>
               <OutlinedInput
                 label='Password'
-                value={values.password}
                 id='auth-login-password'
-                onChange={handleChange('password')}
+                value={password}
+                onChange={handleChangePassword}
                 type={values.showPassword ? 'text' : 'password'}
                 endAdornment={
                   <InputAdornment position='end'>
@@ -195,13 +261,7 @@ const LoginPage = () => {
                 <LinkStyled onClick={e => e.preventDefault()}>Forgot Password?</LinkStyled>
               </Link>
             </Box>
-            <Button
-              fullWidth
-              size='large'
-              variant='contained'
-              sx={{ marginBottom: 7 }}
-              onClick={() => router.push('/')}
-            >
+            <Button fullWidth size='large' variant='contained' sx={{ marginBottom: 7 }} type='submit'>
               Login
             </Button>
             <Box
@@ -214,19 +274,19 @@ const LoginPage = () => {
               }}
             >
               <Typography variant='body1'>
-              Log in as 
+                Log in as
                 <Link passHref href='/pages/u/login'>
-                  <LinkStyled>&nbsp;User&nbsp;</LinkStyled>
+                  <LinkStyled>&nbsp;USER&nbsp;</LinkStyled>
                 </Link>
-                OR
-                <Link passHref href='/pages/c/login'>
-                  <LinkStyled>&nbsp;Company&nbsp;</LinkStyled>
+                or
+                <Link passHref href='/pages/a/login'>
+                  <LinkStyled>&nbsp;ADMIN&nbsp;</LinkStyled>
                 </Link>
               </Typography>
 
               <Typography variant='body2' sx={{ marginTop: 4 }}>
                 New on our platform?
-                <Link passHref href='/pages/a/register'>
+                <Link passHref href='/pages/c/register'>
                   <LinkStyled> Create an account</LinkStyled>
                 </Link>
               </Typography>

@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, Fragment } from 'react'
+import { useState, Fragment, useEffect, useContext } from 'react'
 
 // ** Next Imports
 import Link from 'next/link'
@@ -20,6 +20,10 @@ import { styled, useTheme } from '@mui/material/styles'
 import MuiCard from '@mui/material/Card'
 import InputAdornment from '@mui/material/InputAdornment'
 import MuiFormControlLabel from '@mui/material/FormControlLabel'
+import { useRouter } from 'next/router'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 // ** Icons Imports
 import Google from 'mdi-material-ui/Google'
@@ -28,6 +32,7 @@ import Twitter from 'mdi-material-ui/Twitter'
 import Facebook from 'mdi-material-ui/Facebook'
 import EyeOutline from 'mdi-material-ui/EyeOutline'
 import EyeOffOutline from 'mdi-material-ui/EyeOffOutline'
+import { SettingsContext } from 'src/@core/context/settingsContext'
 
 // ** Configs
 import themeConfig from 'src/configs/themeConfig'
@@ -59,18 +64,30 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 }))
 
 const RegisterPage = () => {
+  const { contextTokenValue: { setAuthToken } } = useContext(SettingsContext);
+
   // ** States
   const [values, setValues] = useState({
-    password: '',
     showPassword: false
   })
+  const [tokenR, setToken] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [tc, setTc] = useState(false)
+  const [userInfo, setUserInfo] = useState({
+    username: '',
+    email: '',
+    password: '',
+  })
 
+  const [error, setError] = useState(false)
+  const [errorCheck, setErrorCheck] = useState(false)
   // ** Hook
   const theme = useTheme()
+  const router = useRouter()
 
-  const handleChange = prop => event => {
-    setValues({ ...values, [prop]: event.target.value })
-  }
+  // const handleChange = prop => event => {
+  //   setValues({ ...values, [prop]: event.target.value })
+  // }
 
   const handleClickShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword })
@@ -79,6 +96,74 @@ const RegisterPage = () => {
   const handleMouseDownPassword = event => {
     event.preventDefault()
   }
+
+  const handleConfirmPassword = e => {
+    setConfirmPassword(e.target.value)
+  }
+
+  const verifyPassword = () => {
+    if (confirmPassword !== userInfo.password) {
+      setError(true)
+    } else {
+      setError(false)
+    }
+  }
+
+  const handleChange = e => {
+    const { name, value } = e.target
+    setUserInfo(prevData => ({
+      ...prevData,
+      [name]: value
+    }))
+
+    setUserInfo(prevData => ({
+      ...prevData,
+      password_confirmation: prevData.password,
+    }))
+  }
+
+  const handleCheck = e => {
+    if (e.target.checked) {
+      setTc(true)
+    } else {
+      setTc(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!tc) {
+      setErrorCheck(true)
+    } else {
+      setErrorCheck(false)
+    }
+  }, [handleCheck])
+
+  const handleSubmit = async e => {
+    e.preventDefault()
+    const url = e.target.action
+    console.log(userInfo);
+    console.log(error)
+    if (confirmPassword !== userInfo.password && !errorCheck) {
+      toast.error("Passwords do not match"); 
+    } else {
+      try {
+
+        const response = await axios.post('http://127.0.0.1:8000/api/admin/register', userInfo);
+        if (response.data.status == 'success') {
+          // Redirect to a new page
+          router.push('/pages/a/login');
+        }
+      } catch (err) {
+        toast.error("Register fail, invalid input")
+      }
+  
+      console.log(JSON.stringify(userInfo))
+    }
+
+    
+  }
+
+  // console.log(JSON.stringify(userInfo))
 
   return (
     <Box className='content-center'>
@@ -151,28 +236,46 @@ const RegisterPage = () => {
                 lineHeight: 1,
                 fontWeight: 600,
                 textTransform: 'uppercase',
-                fontSize: '1.5rem !important'
+                fontSize: '1.5rem !important',
+                alignContent: 'center',
+                alignItems: 'center'
               }}
             >
-              Borey Management
+              Borey Management Admin
             </Typography>
           </Box>
           <Box sx={{ mb: 6 }}>
             <Typography variant='h5' sx={{ fontWeight: 600, marginBottom: 1.5 }}>
-              Your House Management Starts Here 🚀
+              Your Borey Starts Here 🚀
             </Typography>
             <Typography variant='body2'>Make your borey management easy and fun!</Typography>
           </Box>
-          <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}>
-            <TextField autoFocus fullWidth id='username' label='Username' sx={{ marginBottom: 4 }} />
-            <TextField fullWidth type='email' label='Email' sx={{ marginBottom: 4 }} />
-            <FormControl fullWidth sx={{ marginBottom: 4 }} >
+          <form noValidate autoComplete='off' onSubmit={handleSubmit} >
+            <TextField
+              autoFocus
+              fullWidth
+              id='username'
+              name='username'
+              label='Username'
+              sx={{ marginBottom: 4 }}
+              onChange={handleChange}
+            />
+            <TextField
+              fullWidth
+              type='email'
+              name='email'
+              label='Email'
+              sx={{ marginBottom: 4 }}
+              onChange={handleChange}
+            />
+            <FormControl fullWidth sx={{ marginBottom: 4 }}>
               <InputLabel htmlFor='auth-register-password'>Password</InputLabel>
               <OutlinedInput
                 label='Password'
-                value={values.password}
+                value={userInfo.password}
                 id='auth-register-password'
-                onChange={handleChange('password')}
+                name='password'
+                onChange={handleChange}
                 type={values.showPassword ? 'text' : 'password'}
                 endAdornment={
                   <InputAdornment position='end'>
@@ -187,15 +290,14 @@ const RegisterPage = () => {
                   </InputAdornment>
                 }
               />
-              
             </FormControl>
-            <FormControl fullWidth sx={{ marginBottom: 4 }} >
+            <FormControl fullWidth sx={{ marginBottom: 4 }}>
               <InputLabel htmlFor='auth-register-password'>Confirm Password</InputLabel>
               <OutlinedInput
                 label='Confirm Password'
-                value={values.password}
-                id='auth-register-password'
-                onChange={handleChange('password')}
+                id='auth-register-confirm-password'
+                onChange={handleConfirmPassword}
+                onBlur={verifyPassword}
                 type={values.showPassword ? 'text' : 'password'}
                 endAdornment={
                   <InputAdornment position='end'>
@@ -209,11 +311,16 @@ const RegisterPage = () => {
                     </IconButton>
                   </InputAdornment>
                 }
+                sx={{ ...(error && { borderColor: 'red' }) }} // Apply red border color if there is an error
               />
-              
             </FormControl>
+            {error && (
+              <Typography variant='body2' color='error'>
+                Passwords do not match
+              </Typography>
+            )}
             <FormControlLabel
-              control={<Checkbox />}
+              control={<Checkbox onChange={handleCheck} />}
               label={
                 <Fragment>
                   <span>I agree to </span>
@@ -222,19 +329,24 @@ const RegisterPage = () => {
                   </Link>
                 </Fragment>
               }
+              sx={{ ...(errorCheck && { borderColor: 'red' }) }}
             />
-            <Link passHref href='/pages/a/register'>
-              <Button fullWidth size='large' type='submit' variant='contained' sx={{ marginBottom: 7 }}>
-                Sign up
-              </Button>
-            </Link>
-            
+            {errorCheck && (
+              <Typography variant='body2' color='error'>
+                Please agree on term and conditions
+              </Typography>
+            )}
+
+            <Button fullWidth size='large' type='submit' variant='contained' sx={{ marginBottom: 7 }}>
+              Sign up
+            </Button>
+
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Typography variant='body2' sx={{ marginRight: 2 }}>
                 Already have an account?
               </Typography>
               <Typography variant='body2'>
-                <Link passHref href='/pages/a/login'>
+                <Link passHref href='/pages/c/login'>
                   <LinkStyled>Sign in instead</LinkStyled>
                 </Link>
               </Typography>
