@@ -25,6 +25,7 @@ import SalesByCountries from 'src/views/dashboard/SalesByCountries'
 import axios from 'axios'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
+import { useRouter } from 'next/router'
 
 const Dashboard = () => {
   const {
@@ -37,7 +38,7 @@ const Dashboard = () => {
   totalUser: '',
   totalForm: ''
 })
-
+  const router = useRouter();
   const fetchCompanies = async () => {
     try {
       const res = await axios({
@@ -54,6 +55,9 @@ const Dashboard = () => {
         totalCompanies: res.data.length
       }))
     } catch (err) {
+      if (err.response.data.message === "Unauthenticated.") {
+        router.push('/pages/a/login')
+      }
       console.log(err)
     }
   }
@@ -141,12 +145,15 @@ const Dashboard = () => {
         } catch (err) {
           console.log(err)
         }
+      } else {
+        
       }
     }
-    if (token !== null) {
-      fetchUser();
-    }
-  }, [token])
+    
+    fetchUser();
+    
+  }, [token]);
+
     return (
       <ApexChartWrapper>
         {loadingData && (
