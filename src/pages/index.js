@@ -32,6 +32,96 @@ const Dashboard = () => {
   } = useContext(SettingsContext)
  const [currentUser, setCurrentUser] = useState(null)
  const [loadingData, setLoadingData] = useState(true)
+ const [data, setData] = useState({
+  totalCompanies: '',
+  totalUser: '',
+  totalForm: ''
+})
+
+  const fetchCompanies = async () => {
+    try {
+      const res = await axios({
+        method: 'GET',
+        // baseURL: API_URL,
+        url: 'http://127.0.0.1:8000/api/company/showCompanies',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log('Companies: ',res)
+      setData(prevState => ({
+        ...prevState,
+        totalCompanies: res.data.length
+      }))
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const fetchTotalUsers = async () => {
+    try {
+      const res = await axios({
+        method: 'GET',
+        // baseURL: API_URL,
+        url: 'http://127.0.0.1:8000/api/user_infos',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log('Users: ',res)
+      setData(prevState => ({
+        ...prevState,
+        totalUser: res.data.length
+      }))
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const fetchTotalForm = async () => {
+    let totalForm = 0;
+    try {
+      const res = await axios({
+        method: 'GET',
+        // baseURL: API_URL,
+        url: 'http://127.0.0.1:8000/api/form_generals',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log('Form generals', res);
+      totalForm = totalForm + res.data.length;
+    } catch (err) {
+      console.log(err)
+    }
+
+    try {
+      const res = await axios({
+        method: 'GET',
+        // baseURL: API_URL,
+        url: 'http://127.0.0.1:8000/api/form_environments',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      console.log('Form generals', res)
+      totalForm = totalForm + res.data.length;
+      console.log("total form: ", totalForm)
+    } catch (err) {
+      console.log(err)
+    }
+
+    setData(prevState => ({
+      ...prevState,
+      totalForm: totalForm
+    }))
+  }
+
+  useEffect(() => {
+    fetchCompanies()
+    fetchTotalUsers()
+    fetchTotalForm()
+  }, [token])
 
  useEffect(() => {
     const fetchUser = async () => {
@@ -76,7 +166,7 @@ const Dashboard = () => {
         >
           <CircularProgress />
           <Typography variant='body1' style={{ marginLeft: '1rem' }}>
-            Please wait, uploading image...
+            Please wait, loading...
           </Typography>
         </div>
       )}
@@ -99,18 +189,18 @@ const Dashboard = () => {
             <Grid container spacing={6}>
               <Grid item xs={6}>
                 <CardStatisticsVerticalComponent
-                  stats='$25.6k'
+                  stats={data.totalCompanies}
                   icon={<Poll />}
                   color='success'
                   trendNumber='+42%'
-                  title='Total Profit'
+                  title='Total Companies'
                   subtitle='Weekly Profit'
                 />
               </Grid>
               <Grid item xs={6}>
                 <CardStatisticsVerticalComponent
-                  stats='$78'
-                  title='Refunds'
+                  stats={data.totalUser}
+                  title='Total Users'
                   trend='negative'
                   color='secondary'
                   trendNumber='-15%'
@@ -120,10 +210,10 @@ const Dashboard = () => {
               </Grid>
               <Grid item xs={6}>
                 <CardStatisticsVerticalComponent
-                  stats='862'
+                  stats={data.totalForm}
                   trend='negative'
                   trendNumber='-18%'
-                  title='New Project'
+                  title='Total Form Report'
                   subtitle='Yearly Project'
                   icon={<BriefcaseVariantOutline />}
                 />
@@ -141,15 +231,8 @@ const Dashboard = () => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item xs={12} md={6} lg={4}>
-            <SalesByCountries />
-          </Grid>
-          <Grid item xs={12} md={12} lg={8}>
-            <DepositWithdraw />
-          </Grid>
-          <Grid item xs={12}>
-            <Table />
-          </Grid>
+         
+        
         </Grid>
       )}
       </ApexChartWrapper>

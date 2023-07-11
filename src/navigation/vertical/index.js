@@ -14,14 +14,17 @@ import AccountSupervisorCircle from 'mdi-material-ui/AccountSupervisorCircle';
 const navigation = () => {
   return [
     {
-      title: 'Dashboard',
+      title: 'Admin Dashboard',
       icon: HomeOutline,
       path: '/'
     },
     {
+      sectionTitle: 'Companies Info'
+    },
+    {
       title: 'All Companies',
       icon: AccountCogOutline,
-      path: '/user-info'
+      path: '/companies-info'
     },
     {
       sectionTitle: 'Service'
