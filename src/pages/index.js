@@ -55,9 +55,7 @@ const Dashboard = () => {
         totalCompanies: res.data.length
       }))
     } catch (err) {
-      if (err.response.data.message === "Unauthenticated.") {
-        router.push('/pages/a/login')
-      }
+      
       console.log(err)
     }
   }
@@ -112,6 +110,7 @@ const Dashboard = () => {
       totalForm = totalForm + res.data.length;
       console.log("total form: ", totalForm)
     } catch (err) {
+      
       console.log(err)
     }
 

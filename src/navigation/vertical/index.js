@@ -57,11 +57,6 @@ const navigation = () => {
       sectionTitle: 'E-Suggestion'
     },
     {
-      title: 'Survey',
-      icon: FormatLetterCase,
-      path: '/survey'
-    },
-    {
       title: 'Request Form',
       icon: CreditCardOutline,
       path: '/request-form'
